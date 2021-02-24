@@ -1,9 +1,9 @@
 require_relative "../../kitchen-transport-train/version"
 
-require "forwardable"
-require "kitchen/errors"
-require "kitchen/transport/base"
-require "train"
+require "forwardable" unless defined?(Forwardable)
+require "kitchen/errors" unless defined?(Kitchen::UserError)
+require "kitchen/transport/base" unless defined?(Kitchen::Transport::Base)
+require "train" unless defined?(Train)
 
 module Kitchen
   module Transport
@@ -73,7 +73,7 @@ module Kitchen
       def connection_options(data)
         # `windows_os?` comes from Kitchen::Configurable, which is included in the Kitchen base transport
         defaults = {
-          backend: windows_os? ? "winrm" : "ssh"
+          backend: windows_os? ? "winrm" : "ssh",
         }
 
         overrides = {
