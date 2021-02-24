@@ -1,6 +1,6 @@
 require_relative "../../kitchen-transport-train/version"
 
-require "forwardable" unless defined?(Forwardable)
+require "forwardable"
 require "kitchen/errors"
 require "kitchen/transport/base"
 require "train"
@@ -23,6 +23,7 @@ module Kitchen
       end
 
       class Connection < Kitchen::Transport::Base::Connection
+        # Forward everything to the Train connection, where adapters are not needed
         extend Forwardable
         def_delegators :@connection, :close, :upload, :download, :wait_until_ready
 
@@ -43,16 +44,16 @@ module Kitchen
 
           logger.debug("[Train/#{options[:backend]}] Execute (#{command})")
 
-          result = @connection.run_command(command)
+          command_result = @connection.run_command(command)
 
-          if result.exit_status == 0
-            logger.info(result.stdout)
+          if command_result.exit_status == 0
+            logger.info(command_result.stdout)
           else
-            logger.error(result.stderr)
+            logger.error(command_result.stderr)
 
             raise Transport::ConnectionFailed.new(
-              "Train/#{options[:backend]} exited (#{result.exit_status}) for command: [#{command}]",
-              result.exit_status
+              "Train/#{options[:backend]} exited (#{command_result.exit_status}) for command: [#{command}]",
+              command_result.exit_status
             )
           end
         end
@@ -70,6 +71,7 @@ module Kitchen
       # @return [Hash] hash of connection options
       # @api private
       def connection_options(data)
+        # `windows_os?` comes from Kitchen::Configurable, which is included in the Kitchen base transport
         defaults = {
           backend: windows_os? ? "winrm" : "ssh"
         }
@@ -78,7 +80,7 @@ module Kitchen
           instance_name: instance.name,
           kitchen_root: Dir.pwd,
 
-          # Kitchen to Train
+          # Kitchen to Train parameter conversion
           host: data[:hostname],
           user: data[:username],
         }
@@ -86,8 +88,8 @@ module Kitchen
         defaults.merge(data).merge(overrides)
       end
 
+      # Map Kitchen parameters to their Train equivalents for compatibility.
       def adjust_options(data)
-        # Map Kitchen SSH transport to Train SSH transport options
         if data[:backend] == "ssh"
           data[:key_files] = data[:ssh_key]
           data.delete(:ssh_key)

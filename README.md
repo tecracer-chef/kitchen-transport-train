@@ -2,11 +2,11 @@
 
 ## Summary
 
-Kitchen transport to use any Train backend.
+Kitchen transport to use any Train backend, which makes Test Kitchen much more modular with regards to target machines.
 
-As Train OS Transports were inspired from Kitchen, they provide an almost identical API. This transport is an adapter to use Test Kitchen with all OS-style Train transports.
+As Train OS Transports were inspired from Kitchen, they provide an almost identical API. This transport is basically an adapter to use Test Kitchen with all OS-style Train transports.
 
-In contrast to normal Kitchen drivers, this does not support the `kitchen login` command as Train is inherently non-interactive. An error will be displayed if you try to use this command.
+In contrast to normal Kitchen transports, this does not support the `kitchen login` command as Train is inherently non-interactive. An error will be displayed if you try to use this command.
 
 ## Examples
 
