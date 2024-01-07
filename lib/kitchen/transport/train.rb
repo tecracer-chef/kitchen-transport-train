@@ -39,6 +39,32 @@ module Kitchen
           yield self if block_given?
         end
 
+        def train_uri
+          @connection.uri
+        end
+
+        def credentials_file
+          instance_name = @connection.transport_options[:instance_name]
+
+          # TODO: only include non-default values
+          config = @backend.instance_variable_get(:@connection_options)
+          config.compact!
+          config.transform_values! { |v| v.is_a?(Symbol) ? v.to_s : v }
+
+          # TODO: huh! is there no clear "signature"? accepted, default parameters + dynamics?
+          config[:host] = config[:hostname] = @connection.transport_options[:host]
+          config[:user] = config[:username] = @connection.transport_options[:user]
+          config[:key_files] = @connection.transport_options[:key_files]
+
+          # TODO: I'm tired, so I do this the ugly way
+          config[:user] = config[:username] = "root"
+
+          # TODO: is this part of TK? or a new dependency of kitchen-transport-train?
+          require 'toml-rb' unless defined?(TomlRB)
+
+          "['#{instance_name}']\n" + TomlRB.dump(config)
+        end
+
         def execute(command)
           return if command.nil?
 
