@@ -46,20 +46,19 @@ module Kitchen
         def credentials_file
           instance_name = @connection.transport_options[:instance_name]
 
-          # TODO: only include non-default values
           config = @backend.instance_variable_get(:@connection_options)
           config.compact!
           config.transform_values! { |v| v.is_a?(Symbol) ? v.to_s : v }
 
-          # TODO: huh! is there no clear "signature"? accepted, default parameters + dynamics?
+          # Some configuration variables vary between transports
           config[:host] = config[:hostname] = @connection.transport_options[:host]
-          config[:user] = config[:username] = @connection.transport_options[:user]
           config[:key_files] = @connection.transport_options[:key_files]
 
-          # TODO: I'm tired, so I do this the ugly way
-          config[:user] = config[:username] = "root"
+          # Due to a long-standing bug in TestKitchen, standard platforms will override
+          # kitchen.yml `user` settings, so this transport introduces an "train_user" override.
+          # See https://github.com/test-kitchen/kitchen-ec2/pull/273
+          config[:user] = config[:username] = @connection.transport_options[:train_user] || @connection.transport_options[:user]
 
-          # TODO: is this part of TK? or a new dependency of kitchen-transport-train?
           require 'toml-rb' unless defined?(TomlRB)
 
           "['#{instance_name}']\n" + TomlRB.dump(config)
@@ -120,6 +119,10 @@ module Kitchen
           data[:key_files] = data[:ssh_key]
           data.delete(:ssh_key)
         end
+
+        # Adjust option defaults
+        data[:retries] = 15
+        data[:delay] = 5
 
         data
       end
