@@ -45,6 +45,10 @@ transport:
 
 Options `user`, `host` and `password` (for kitchen-ec2 and Windows instances) are set automatically.
 
+If you want to use `kitchen-ec2` with the `root` user however (as needed in Chef 19 Target Mode), you need to additionally specify `train_user: root`. This is due to a long-standing bug in Kitchen-EC2 where the standard platform's autodetected user will override manually specified `root` values.
+
+Standard and community-supported options for transports:
+
 - [AWS Session Manager Transport](https://github.com/tecracer-chef/train-awsssm/blob/master/lib/train-awsssm/transport.rb#L8-L14)
 - Docker Transport: no additional options
 - [Serial/USB Transport](https://github.com/tecracer-chef/train-serial/blob/master/lib/train-serial/transport.rb#L8-L22)
