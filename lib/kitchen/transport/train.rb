@@ -59,7 +59,7 @@ module Kitchen
           # See https://github.com/test-kitchen/kitchen-ec2/pull/273
           config[:user] = config[:username] = @connection.transport_options[:train_user] || @connection.transport_options[:user]
 
-          require 'toml-rb' unless defined?(TomlRB)
+          require "toml-rb" unless defined?(TomlRB)
 
           "['#{instance_name}']\n" + TomlRB.dump(config)
         end
